@@ -20,7 +20,7 @@ export const getCurrentUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.json(user);
+    return res.json(user);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
@@ -30,7 +30,7 @@ export const getCurrentUser = async (req, res) => {
 export const getUserById = async (req, res) => {
   const { userId } = req.params;
   try {
-    const user = await User.findById(userId).select("username email avatar");
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -71,4 +71,98 @@ export const createUser = async (req, res) => {
   res
     .status(200)
     .send({ data: newUser, message: "Account created successfully" });
+};
+
+export const followUser = async (req, res) => {
+  const { userId } = req.params;
+  const { currentUserId } = req.body; // Extract currentUserId from the body
+
+  console.log("userId:", userId);
+  console.log("currentUserId:", currentUserId);
+
+  if (!currentUserId) {
+    return res.status(400).json({ message: "currentUserId is required" });
+  }
+
+  try {
+    // Tìm người dùng và người theo dõi
+    const user = await User.findById(userId);
+    const currentUser = await User.findById(currentUserId);
+
+    if (!user || !currentUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Kiểm tra nếu đã theo dõi
+    if (user.followers.includes(currentUserId)) {
+      return res.status(400).json({ message: "User is already followed" });
+    }
+
+    // Thêm ID vào danh sách followers/following
+    user.followers.push(currentUserId);
+    currentUser.following.push(userId);
+
+    // Cập nhật followersCount
+    user.followersCount = user.followers.length;
+
+    // Lưu lại dữ liệu
+    await user.save();
+    await currentUser.save();
+
+    // Trả về kết quả
+    res.json({
+      message: "User followed successfully",
+      followerCount: user.followersCount, // Trả về số lượng followers
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const unFollowUser = async (req, res) => {
+  const { currentUserId } = req.body;
+  const { id: artistId } = req.params;
+
+  try {
+    const artist = await User.findById(artistId);
+    if (!artist) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Artist not found" });
+    }
+
+    // Xóa userId khỏi danh sách followers
+    artist.followers = artist.followers.filter(
+      (followerId) => followerId.toString() !== currentUserId
+    );
+    await artist.save();
+
+    res.json({ success: true, message: "Unfollowed successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+export const checkFollowStatus = async (req, res) => {
+  const { userId } = req.params;
+  const { currentUserId } = req.body;
+
+  if (!currentUserId) {
+    return res.status(400).json({ message: "currentUserId is required" });
+  }
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isFollowed = user.followers.includes(currentUserId);
+    res.json({ isFollowed });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };

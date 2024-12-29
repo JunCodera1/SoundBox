@@ -1,10 +1,8 @@
 import express from "express";
 
-import mongoose from "mongoose";
-
 import { Playlist } from "../model/playlist.model.js";
 import { User } from "../model/user.model.js";
-import { Song } from "../model/song.model.js";
+import authenticateToken from "../middleware/auth.js";
 
 import passport from "passport";
 
@@ -24,43 +22,31 @@ const router = express.Router();
 // Route 1: Create playlist
 router.post(
   "/create",
-  passport.authenticate("jwt", { session: false }), // Passport JWT strategy
+  passport.authenticate("jwt", { session: false }),
   createPlaylist
 );
 
 // Get a playlist by ID
 
-router.get(
-  "/get/playlist/:playlistId",
-  passport.authenticate("jwt-strategy-1", { session: false }),
-  getPlaylistById
-);
+router.get("/get/playlist/:playlistId", getPlaylistById);
 
-router.put(
-  "/put/:playlistId",
-  passport.authenticate("jwt-strategy-1", { session: false }),
-  updatePlaylistById
-);
+router.put("/put/:playlistId", updatePlaylistById);
 
 // Get all playlists made by me
 // /get/me
 router.get(
   "/get/me",
-  passport.authenticate("jwt-strategy-1", { session: false }),
+  passport.authenticate("jwt", { session: false }),
   getPlaylistCurrentUser
 );
 
 // Get all playlists made by an artist
 // /get/artist/xyz
-router.get(
-  "/get/artist/:artistId",
-  passport.authenticate("jwt-strategy-1", { session: false }),
-  getPlaylistByArtistId
-);
+router.get("/get/artist/:artistId", getPlaylistByArtistId);
 
 router.put(
   "/put/edit/:id",
-  passport.authenticate("jwt-strategy-1", { session: false }),
+  passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     const { id } = req.params;
 
@@ -98,11 +84,7 @@ router.put(
 );
 
 // Add a song to a playlist
-router.post(
-  "/add/song/:playlistId/:songId",
-  passport.authenticate("jwt-strategy-1", { session: false }),
-  addSongToPlaylist
-);
+router.post("/add/song/:playlistId/:songId", addSongToPlaylist);
 
 // Get playlist by name
 router.get("/get/playlistname/:playlistName", getPlaylistByName);

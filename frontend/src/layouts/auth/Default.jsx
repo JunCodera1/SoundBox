@@ -56,26 +56,7 @@ function AuthIllustration(props) {
           </Flex>
         </NavLink>
         {children}
-        <Box
-          display={{ base: "none", md: "block" }}
-          h="100%"
-          minH="100vh"
-          w={{ lg: "50vw", "2xl": "44vw" }}
-          position="absolute"
-          right="0px"
-        >
-          <Flex
-            bg={`url(${illustrationBackground})`}
-            justify="center"
-            align="end"
-            w="100%"
-            h="100%"
-            bgSize="cover"
-            bgPosition="50%"
-            position="absolute"
-            borderBottomLeftRadius={{ lg: "120px", xl: "200px" }}
-          ></Flex>
-        </Box>
+
         <Footer />
       </Flex>
       <FixedPlugin />

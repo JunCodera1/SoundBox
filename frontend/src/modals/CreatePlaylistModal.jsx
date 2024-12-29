@@ -35,11 +35,11 @@ const CreatePlaylistModal = ({ isOpen, closeModal }) => {
       const response = await makeAuthenticatedPOSTRequest("/playlist/create", {
         name: playlistName,
         thumbnail: playlistThumbnail,
-        description, // Include description in request payload
+        description,
         songs: [],
       });
-
-      if (response._id) {
+      console.log(response);
+      if (response) {
         setSuccess(true); // Playlist created successfully
         toast({
           title: "Playlist created.",

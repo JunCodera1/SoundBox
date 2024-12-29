@@ -1,11 +1,18 @@
 import React, { useContext, useState, useEffect } from "react";
 import { PlayCircle, MoreHorizontal } from "lucide-react";
-import SongContext from "./SongContext";
+import SongContext from "../SongContext";
 import { Howl } from "howler";
 import AddToPlaylistModal from "@/modals/AddToPlaylistModal"; // Import the AddToPlaylistModal
 import { Heart } from "lucide-react"; // Import biểu tượng trái tim
 import { Box, useColorModeValue } from "@chakra-ui/react";
-import { makeUnAuthenticatedPUTRequest } from "@/utils/serverHelper";
+import Cookies from "js-cookie";
+import {
+  makeAuthenticatedGETRequest,
+  makeAuthenticatedPUTRequest,
+  makeUnAuthenticatedPUTRequest,
+} from "@/utils/serverHelper";
+import UpdateSongModal from "@/modals/UpdateSongModal";
+import { jwtDecode } from "jwt-decode";
 
 // Helper function to format duration
 const formatDuration = (durationInSeconds) => {
@@ -31,7 +38,14 @@ const SingleSongCard = ({ info, onPlay }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false); // State for the download modal
   const [addToPlaylistModalOpen, setAddToPlaylistModalOpen] = useState(false); // State for add to playlist modal
+  const [updateSongModalOpen, setUpdateSongModalOpen] = useState(false);
   const [isLiked, setIsLiked] = useState(false); // Trạng thái "Yêu thích"
+  const [tracks, setTracks] = useState([]);
+  const token = Cookies.get("token");
+  if (!token) throw new Error("Token not found");
+  console.log(token);
+
+  const userId = jwtDecode(token).identifier;
 
   useEffect(() => {
     if (!info.duration) {
@@ -47,14 +61,46 @@ const SingleSongCard = ({ info, onPlay }) => {
     }
   }, [info]);
 
+  useEffect(() => {
+    const checkLikeStatus = async () => {
+      try {
+        const response = await makeAuthenticatedGETRequest(
+          `/song/get/check-like/${info._id}`
+        );
+
+        // Kiểm tra xem response có phải là JSON hợp lệ không
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Server không trả về JSON.");
+        }
+
+        const data = await response.json();
+        console.log("Like status:", data);
+
+        // Kiểm tra xem likedBy có chứa userId của người dùng hiện tại không
+        const isLiked = data.likedBy && data.likedBy.includes(userId);
+        console.log(data.likedBy.includes(userId));
+        setIsLiked(isLiked);
+      } catch (error) {
+        console.error("Error checking like status:", error);
+      }
+    };
+
+    if (info._id) {
+      checkLikeStatus();
+    }
+  }, [info._id, userId]);
+
   const formattedDuration = duration ? formatDuration(duration) : "Loading...";
 
   const handleLike = async (trackId, isLiked) => {
+    trackId = info._id;
     try {
       const endpoint = isLiked
         ? `/song/put/unlike/${trackId}`
         : `/song/put/like/${trackId}`;
-      const response = await makeUnAuthenticatedPUTRequest(endpoint);
+      const response = await makeAuthenticatedPUTRequest(endpoint);
+      setIsLiked(true);
 
       // Update the UI or state with the new data
       setTracks((prevTracks) =>
@@ -94,6 +140,11 @@ const SingleSongCard = ({ info, onPlay }) => {
   const handleAddToPlaylist = () => {
     setAddToPlaylistModalOpen(true); // Open the add to playlist modal
     setMenuOpen(false); // Close the dropdown menu
+  };
+
+  const handleUpdate = () => {
+    setUpdateSongModalOpen(true);
+    setMenuOpen(false);
   };
 
   return (
@@ -155,14 +206,17 @@ const SingleSongCard = ({ info, onPlay }) => {
       <div className="flex items-center gap-4 ml-auto relative">
         <div className="text-md text-gray-400">{formattedDuration}</div>
         <button
-          className={`text-gray-400 hover:text-pink-500 transition-colors duration-200 relative ${
+          className={`text-gray-400 hover:text-pink-500 transition-colors duration-200 relative flex items-center gap-2 ${
             isLiked ? "text-pink-500" : ""
           }`}
           onClick={handleLike}
           aria-label={`Like ${info.name}`}
         >
           <Heart className="w-5 h-5" />
+          <span>{info.likes}</span>
+          <span>{isLiked ? "Liked" : "Like"}</span>
         </button>
+
         <button
           className="text-gray-400 hover:text-white transition-colors duration-200 relative"
           onClick={(e) => {
@@ -195,6 +249,12 @@ const SingleSongCard = ({ info, onPlay }) => {
                 }}
               >
                 Download
+              </li>
+              <li
+                className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
+                onClick={handleUpdate}
+              >
+                Update
               </li>
               <li
                 className="px-4 py-2 hover:bg-gray-700 cursor-pointer"
@@ -242,6 +302,13 @@ const SingleSongCard = ({ info, onPlay }) => {
             setAddToPlaylistModalOpen(false);
           }}
           songId={info._id}
+        />
+      )}
+      {updateSongModalOpen && (
+        <UpdateSongModal
+          closeModal={() => setUpdateSongModalOpen(false)}
+          isOpen={updateSongModalOpen}
+          song={info}
         />
       )}
     </Box>

@@ -17,6 +17,7 @@ const songSchema = new mongoose.Schema({
   },
   genre: {
     type: String,
+    required: true,
   },
   duration: {
     type: Number,
@@ -30,7 +31,28 @@ const songSchema = new mongoose.Schema({
   },
   likes: { type: Number, default: 0 }, // Store number of likes
   likedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // Optional: track users who liked
+  comments: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Comment",
+    },
+  ],
 });
+songSchema.methods.addLike = async function (userId) {
+  if (!this.likedBy.includes(userId)) {
+    this.likes += 1;
+    this.likedBy.push(userId);
+    await this.save();
+  }
+};
+
+songSchema.methods.removeLike = async function (userId) {
+  if (this.likedBy.includes(userId)) {
+    this.likes = Math.max(0, this.likes - 1);
+    this.likedBy = this.likedBy.filter((id) => id !== userId);
+    await this.save();
+  }
+};
 
 // Validate song
 const validate = (song) => {

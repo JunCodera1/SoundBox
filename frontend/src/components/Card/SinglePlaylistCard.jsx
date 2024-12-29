@@ -9,8 +9,9 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons"; // Dropdown icon
-import EditPlaylistModal from "../modals/EditPlaylistModal"; // Edit Playlist modal component
+import EditPlaylistModal from "../../modals/EditPlaylistModal"; // Edit Playlist modal component
 import { makeAuthenticatedGETRequest } from "@/utils/serverHelper"; // API helper function
+import axios from "axios";
 
 const SinglePlaylistCard = ({ playlist }) => {
   const [showEditModal, setShowEditModal] = useState(false);
@@ -43,7 +44,6 @@ const SinglePlaylistCard = ({ playlist }) => {
             })
           );
 
-          // Filter out any rejected promises and set the valid song details
           const validSongs = songDetails
             .filter((result) => result.status === "fulfilled")
             .map((result) => result.value);

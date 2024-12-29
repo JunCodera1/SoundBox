@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import LoggedInContainer from "../containers/LoggedInContainer";
 import { makeAuthenticatedGETRequest } from "../utils/serverHelper";
-import SinglePlaylistCard from "../components/SinglePlaylistCard"; // Import the new component
+import SinglePlaylistCard from "../components/Card/SinglePlaylistCard"; // Import the new component
 import { Button } from "@chakra-ui/react";
 import CreatePlaylistModal from "../modals/CreatePlaylistModal";
+import axios from "axios";
 
 const PlaylistViewPage = () => {
   const [playlistDetails, setPlaylistDetails] = useState([]);
@@ -14,15 +15,16 @@ const PlaylistViewPage = () => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const response = await makeAuthenticatedGETRequest(`/playlist/get/me`);
-        setPlaylistDetails(response.data); // Assumes the response data is an array of playlists
+        const response = await makeAuthenticatedGETRequest("/playlist/get/me");
+
         console.log(response.data);
+        setPlaylistDetails(response.data); // Assumes the response data is an array of playlists
       } catch (error) {
         console.error("Error fetching playlist data:", error);
       }
     };
     getData();
-  }, [playlistId]);
+  }, []);
 
   const openCreateModal = () => {
     setShowCreateModal(true);
@@ -44,17 +46,15 @@ const PlaylistViewPage = () => {
           Create Playlist
         </Button>
       </div>
-      {playlistDetails.length > 0 ? (
-        <div className="pt-10 space-y-3">
-          {playlistDetails.map((playlist) => (
-            <SinglePlaylistCard
-              key={playlist._id} // Assuming each playlist has a unique ID
-              playlist={playlist} // Passing the playlist data
-            />
-          ))}
-        </div>
+      {Array.isArray(playlistDetails) ? (
+        playlistDetails.map((playlist) => (
+          <SinglePlaylistCard
+            key={playlist._id} // Assuming each playlist has a unique ID
+            playlist={playlist} // Passing the playlist data
+          />
+        ))
       ) : (
-        <div className="text-white">Loading Playlists...</div>
+        <div>No playlists available</div> // A fallback message when there are no playlists
       )}
     </LoggedInContainer>
   );

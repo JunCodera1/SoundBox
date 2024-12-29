@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { Box, Text, Stack, Spinner } from "@chakra-ui/react";
 import LoggedInContainer from "@/containers/LoggedInContainer";
 import { makeAuthenticatedGETRequest } from "@/utils/serverHelper";
-import SingleSongCard from "@/components/SingleSongCard";
+import SingleSongCard from "@/components/Card/SingleSongCard";
 
 const PlaylistDetails = () => {
   const { playlistId } = useParams(); // Lấy ID playlist từ URL

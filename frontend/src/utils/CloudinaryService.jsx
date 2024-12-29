@@ -1,4 +1,4 @@
-import { Cloudinary as CoreCloudinary, Util } from 'cloudinary-core';
+import { Cloudinary as CoreCloudinary, Util } from "cloudinary-core";
 
 export const url = (publicId, options) => {
   try {
@@ -12,6 +12,5 @@ export const url = (publicId, options) => {
 };
 
 export const openUploadWidget = (options, callback) => {
-
   return window.cloudinary.openUploadWidget(options, callback);
 };

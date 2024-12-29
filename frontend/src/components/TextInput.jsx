@@ -17,6 +17,7 @@ const TextInput = ({ label, placeholder, className, value, setValue }) => {
         className="p-2 md:p-3 border-3 bg-black border-gray-400 rounded w-full placeholder-gray-500 text-sm md:text-base lg:text-lg "
         id={label}
         value={value}
+        required
         onChange={(e) => setValue(e.target.value)}
       />
     </div>

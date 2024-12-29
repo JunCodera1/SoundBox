@@ -11,26 +11,25 @@ const HomeSlider = () => {
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
-    autoplaySpeed: 3000,
+    autoplaySpeed: 2500,
   };
 
   const slides = [
     {
       id: 1,
-      image:
-        "https://ss-images.saostar.vn/2018/08/31/3582800/ava-usuk-ngang-copy.jpg",
+      image: "https://antares.am/wp-content/uploads/2024/12/Music.jpg",
       alt: "Slide 1",
     },
     {
       id: 2,
       image:
-        "https://www.shutterstock.com/shutterstock/videos/3438942789/thumb/1.jpg?ip=x480",
+        "https://i.ytimg.com/vi/KzqoSeVMGrQ/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLD82WBkkmy4mTE6QVUzjbYTm6_PHQ",
       alt: "Slide 2",
     },
     {
       id: 3,
       image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRhaO4J3W42OsDi5jhvpfdqF8RGvWkvoUdXbA&s",
+        "https://static1.srcdn.com/wordpress/wp-content/uploads/2023/01/featured-image-anime-focused-on-classical-music.jpg",
       alt: "Slide 3",
     },
   ];

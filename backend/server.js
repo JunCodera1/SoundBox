@@ -6,12 +6,15 @@ import connectDB from "./config/db.js";
 import userRoutes from "./routes/users.route.js";
 import authRoutes from "./routes/auth.route.js";
 import songRoutes from "./routes/songs.route.js";
+import commentRoutes from "./routes/comments.route.js";
+import postRoutes from "./routes/posts.route.js";
 import playlistRoutes from "./routes/playlists.route.js";
 import passport from "passport";
 import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
 import { User } from "./model/user.model.js";
 import rateLimit from "express-rate-limit";
 import path from "path";
+import { Song } from "./model/song.model.js";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -33,13 +36,6 @@ app.use(
   })
 );
 
-app.use(
-  rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // max 100 requests per windowMs
-  })
-);
-
 app.use(express.json()); // Parse JSON bodies
 
 // Routes
@@ -47,6 +43,8 @@ app.use("/user", userRoutes);
 app.use("/auth", authRoutes);
 app.use("/song", songRoutes);
 app.use("/playlist", playlistRoutes);
+app.use("/comment", commentRoutes);
+app.use("/post", postRoutes);
 app.use(express.json({ limit: "25mb" }));
 
 if (process.env.NODE_ENV === "production") {
@@ -57,46 +55,24 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 // Passport JWT Strategy
-const opts = {};
-
+let opts = {};
 opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-opts.secretOrKey = process.env.JWT_SECRET; // Thay thế bằng secret key của bạn
+opts.secretOrKey = process.env.JWT_SECRET;
 
 // Định nghĩa strategy đầu tiên
 
 passport.use(
-  "jwt-strategy-1",
   new JwtStrategy(opts, async (jwt_payload, done) => {
     try {
-      const user = await User.findOne({ id: jwt_payload.sub });
-      if (user) {
-        return done(null, user);
-      } else {
-        return done(null, false);
-      }
-    } catch (err) {
-      return done(err, false);
-    }
-  })
-);
+      const user = await User.findOne({ _id: jwt_payload.identifier });
 
-// Định nghĩa strategy thứ hai (nếu cần)
-passport.use(
-  "jwt-strategy-2",
-  new JwtStrategy(opts, async (jwt_payload, done) => {
-    console.log("JWT Payload for strategy 2:", jwt_payload);
-    try {
-      const user = await User.find({ id: jwt_payload.sub });
-      console.log("User found for strategy 2:", user);
       if (user) {
-        return done(null, user);
+        return done(null, user); // User tồn tại
       } else {
-        console.warn("User not found for strategy 2:", jwt_payload.sub);
-        return done(null, false);
+        return done(null, false); // Không tìm thấy user
       }
     } catch (err) {
-      console.error("Error during authentication for strategy 2:", err);
-      return done(err, false);
+      return done(err, false); // Xử lý lỗi
     }
   })
 );

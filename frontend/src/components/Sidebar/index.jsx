@@ -47,9 +47,7 @@ export default function Sidebar() {
 
         const fetchUserData = async () => {
           try {
-            const response = await makeAuthenticatedGETRequest(
-              `/user/get/users/${userId}`
-            );
+            const response = await fetch(`/user/get/users/${userId}`);
             setUserData(response);
           } catch (err) {
             setError("Failed to fetch user data.");
@@ -139,14 +137,14 @@ export default function Sidebar() {
         <NavItem
           navSize={navSize}
           icon={FaMusic}
-          title="My music"
+          title="My uploaded music"
           href={"/mysongs"}
         />
-        <NavItem
+        {/* <NavItem
           navSize={navSize}
           icon={FaHeartCirclePlus}
           title="Liked songs"
-        />
+        /> */}
       </Flex>
 
       <Box px={5} mb={4}>

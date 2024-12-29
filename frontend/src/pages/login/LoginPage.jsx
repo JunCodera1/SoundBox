@@ -3,10 +3,12 @@ import { GiMusicSpell } from "react-icons/gi";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Mail, Lock, Loader } from "lucide-react";
-import Input from "../components/Input";
-import Navbar from "../components/Navbar";
+import Input from "@/components/Input";
+import Navbar from "@/components/Navbar";
 import { useCookies } from "react-cookie";
 import { makeAuthenticatedPOSTRequest } from "@/utils/serverHelper";
+import { Bounce, ToastContainer, toast } from "react-toastify";
+import axios from "axios";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -17,18 +19,35 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     setLoading(true);
-    const response = await makeAuthenticatedPOSTRequest("/auth/login", {
-      email,
-      password,
-    });
-    setLoading(false);
-    if (response?.token) {
-      const expiryDate = new Date();
-      expiryDate.setDate(expiryDate.getDate() + 30);
-      setCookie("token", response.token, { path: "/", expires: expiryDate });
-      navigate("/"); // Điều hướng đến trang chính
-    } else {
-      alert("Login failed. Please try again.");
+    try {
+      const result = await axios.post("http://localhost:8080/auth/login", {
+        email,
+        password,
+      });
+
+      console.log("API Response:", result);
+
+      if (result.data && result.data.token) {
+        const { token } = result.data;
+
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + 3000);
+        setCookie("token", token, {
+          path: "/",
+          expires: expiryDate,
+        });
+
+        console.log("Login Success");
+        alert("Login successful!");
+        navigate("/home");
+      } else {
+        alert("Login failed. Incorrect email or password.");
+      }
+    } catch (err) {
+      console.error("Login error:", err.response?.data || err.message);
+      alert("An error occurred during login. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 

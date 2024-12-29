@@ -15,6 +15,7 @@ export const makeUnAuthenticatedPOSTRequest = async (route, body) => {
 
 export const makeAuthenticatedPOSTRequest = async (route, body) => {
   const token = getToken();
+
   const response = await fetch(backendUrl + route, {
     method: "POST",
     headers: {
@@ -23,17 +24,17 @@ export const makeAuthenticatedPOSTRequest = async (route, body) => {
     },
     body: JSON.stringify(body),
   });
+
   const formattedResponse = await response.json();
   return formattedResponse;
 };
 
-export const makeUnAuthenticatedGETRequest = async (route, body) => {
+export const makeUnAuthenticatedGETRequest = async (route) => {
   const response = await fetch(backendUrl + route, {
-    method: "POST",
+    method: "GET", // Thay POST thành GET
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(body),
   });
   const formattedResponse = await response.json();
   return formattedResponse;
@@ -41,6 +42,7 @@ export const makeUnAuthenticatedGETRequest = async (route, body) => {
 
 export const makeAuthenticatedGETRequest = async (route) => {
   const token = getToken();
+
   const response = await fetch(backendUrl + route, {
     method: "GET",
     headers: {
@@ -67,10 +69,10 @@ export const makeAuthenticatedPUTRequest = async (route, body) => {
       },
       body: JSON.stringify(body), // Send the request body with the data to update
     });
-
+    console.log("Response status:", response.status);
     if (!response.ok) {
       const errorResponse = await response.json();
-      throw new Error(errorResponse.message || "Failed to update data.");
+      throw new Error(errorResponse.message);
     }
 
     const formattedResponse = await response.json();
@@ -104,5 +106,6 @@ export const makeUnAuthenticatedPUTRequest = async (route, body) => {
 
 const getToken = () => {
   const tokenMatch = document.cookie.match(/(?:^|;\s*)token\s*=\s*([^;]+)/);
-  return tokenMatch ? tokenMatch[1] : null;
+  const token = tokenMatch ? tokenMatch[1] : null;
+  return token;
 };

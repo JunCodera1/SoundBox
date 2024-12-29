@@ -26,14 +26,7 @@ const Library = () => {
           >
             Overview
           </NavLink>
-          <NavLink
-            to="/library/likes"
-            className={({ isActive }) =>
-              isActive ? "text-teal-500 font-semibold" : "text-gray-400"
-            }
-          >
-            Likes
-          </NavLink>
+
           <NavLink
             to="/library/playlists"
             className={({ isActive }) =>
@@ -42,14 +35,7 @@ const Library = () => {
           >
             Playlists
           </NavLink>
-          <NavLink
-            to="/library/albums"
-            className={({ isActive }) =>
-              isActive ? "text-teal-500 font-semibold" : "text-gray-400"
-            }
-          >
-            Albums
-          </NavLink>
+
           <NavLink
             to="/library/following"
             className={({ isActive }) =>

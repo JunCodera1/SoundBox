@@ -16,7 +16,7 @@ export default function CommentSection({ trackId, userId }) {
   const fetchComments = async () => {
     try {
       const response = await makeUnAuthenticatedGETRequest(
-        `/song/get/comments/${trackId}`
+        `/comment/get/comments/${trackId}`
       );
       if (response.error) {
         console.error("Error fetching comments:", response.error);
@@ -33,14 +33,11 @@ export default function CommentSection({ trackId, userId }) {
     if (!newComment.trim()) return;
 
     try {
-      const response = await makeUnAuthenticatedPOSTRequest(
-        "/song/post/comment",
-        {
-          trackId,
-          userId,
-          text: newComment,
-        }
-      );
+      const response = await makeUnAuthenticatedPOSTRequest("/post/comment", {
+        trackId,
+        userId,
+        text: newComment,
+      });
 
       if (response.error) {
         console.error("Error adding comment:", response.error);

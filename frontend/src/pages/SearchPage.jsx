@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Scroll from "../components/Search/Scroll";
 import LoggedInContainer from "../containers/LoggedInContainer";
-import SingleSongCard from "../components/SingleSongCard";
+import SingleSongCard from "../components/Card/SingleSongCard";
 import { Icon } from "@iconify/react";
 
 import { makeAuthenticatedGETRequest } from "../utils/serverHelper";

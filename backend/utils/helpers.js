@@ -15,7 +15,7 @@ const getToken = (user) => {
 
   // Generate JWT with the payload and secret key from environment variables
   const token = jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: "1h", // Token expiration time
+    expiresIn: "6h", // Token expiration time
   });
 
   return token;

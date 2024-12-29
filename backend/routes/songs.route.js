@@ -1,75 +1,90 @@
 import express from "express";
-
-import passport from "passport";
 import {
   createSong,
-  deleteSongById,
   getAllSongs,
   getSongByArtistId,
   getSongById,
+  updateSongById,
+  deleteSongById,
   getSongByName,
   getSongFeed,
   likeSong,
   unlikeSong,
-  updateSongById,
+  getMySongs,
+  getSongByGenre,
+  checkLikedSong,
+  getSongByUrl,
 } from "../controllers/songs.controller.js";
+import passport from "passport";
 
 const router = express.Router();
 
-// In your backend route definition
+// Create song route (now includes authentication)
 router.post(
   "/create",
-  passport.authenticate("jwt-strategy-1", { session: false }), // Ensure this is correctly verifying the token
+  passport.authenticate("jwt", { session: false }),
   createSong
 );
 
-// Get route to get all songs I have published.
-// router.get(
-//   "/get/mysongs",
-//   passport.authenticate("jwt-strategy-1", { session: false }), // Kiểm tra token trước
-//   getAllSongs
-// );
+router.get(
+  "/get/mysongs",
+  passport.authenticate("jwt", { session: false }),
+  getMySongs
+);
 
-// Get route to get all songs any artist has published
-// I will send the artist id and I want to see all songs that artist has published.
+// Other routes remain the same
+router.get(
+  "/get/allSongs",
+  // passport.authenticate("jwt", { session: false }),
+  getAllSongs
+);
+// Get song by artist ID route (now includes authentication)
 router.get(
   "/get/artist/:artistId",
   passport.authenticate("jwt", { session: false }),
   getSongByArtistId
 );
-
+// Get song by ID route (now includes authentication)
 router.get(
   "/get/mysongs/:songId",
-  passport.authenticate("jwt-strategy-1", { session: false }),
+  passport.authenticate("jwt", { session: false }),
   getSongById
 );
-
+// Update song by ID route (now includes authentication)
 router.put(
   "/put/:songId",
-  passport.authenticate("jwt-strategy-1", { session: false }),
+  passport.authenticate("jwt", { session: false }),
   updateSongById
 );
-
-// Delete song by id
-router.delete("/delete/song/:songId", deleteSongById);
-
-// Get route to get a single song by name
+// Delete song by ID route (now includes authentication)
+router.delete(
+  "/delete/song/:songId",
+  passport.authenticate("jwt", { session: false }),
+  deleteSongById
+);
+// Get song by name route
 router.get("/get/songname/:songName", getSongByName);
-
-// Lấy tất cả bài hát mà người dùng đã thích (Feed)
-router.get(
-  "/get/feed",
-  passport.authenticate("jwt-strategy-1", { session: false }), // Xác thực JWT
-  getSongFeed
+router.get("/get/feed", getSongFeed);
+// Get song by genre route
+router.get("/get/genre/:songGenre", getSongByGenre);
+// Like and unlike song routes (now includes authentication)
+router.put(
+  "/put/like/:id",
+  passport.authenticate("jwt", { session: false }),
+  likeSong
+);
+router.put(
+  "/put/unlike/:id",
+  passport.authenticate("jwt", { session: false }),
+  unlikeSong
 );
 
-// Lấy tất cả bài hát của nhiều người dùng (cả bài hát của người dùng khác)
-router.get("/get/allSongs", getAllSongs);
+router.get(
+  "/get/check-like/:songId",
+  passport.authenticate("jwt", { session: false }),
+  checkLikedSong
+);
 
-// Like a song
-
-router.put("/put/like/:id", likeSong);
-
-router.put("/put/unlike/:id", unlikeSong);
+router.get("/get/song/:songUrl", getSongByUrl);
 
 export default router;

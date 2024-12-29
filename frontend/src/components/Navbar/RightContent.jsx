@@ -50,6 +50,7 @@ import {
 import { IoMoon } from "react-icons/io5";
 import { LuSun } from "react-icons/lu";
 import { NavItem } from "./NavItem";
+import { Navigate } from "react-router-dom";
 
 export function RightContent({ items, user = null }) {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -70,7 +71,15 @@ export function RightContent({ items, user = null }) {
   };
 
   const handleLogout = () => {
+    // Delete the token cookie
     deleteCookie("token");
+
+    // Reset user state to null or empty
+    setUser(null); // If user is stored in state
+
+    // Optionally, navigate the user to the login page
+    Navigate("/login");
+
     console.log("Logged out");
   };
 

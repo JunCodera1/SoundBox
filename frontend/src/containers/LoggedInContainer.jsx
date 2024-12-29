@@ -35,20 +35,20 @@ const menuItemsLeft = [
 
 const LoggedInContainer = ({ children }) => {
   const {
-    currentSong,
-    setCurrentSong,
     soundPlayed,
     setSoundPlayed,
     isPaused,
     setIsPaused,
+    currentSong,
+    setCurrentSong,
+    currentSound,
+    setCurrentSound,
   } = useContext(SongContext);
   const [volume, setVolume] = useState(1);
   const [muted, setMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0); // Thời gian hiện tại
-  const [duration, setDuration] = useState(() => {
-    // Lấy duration từ localStorage nếu có
-    return parseFloat(localStorage.getItem("songDuration") || 0);
-  });
+  const [duration, setDuration] = useState(0);
+
   const replaySong = () => {
     if (soundPlayed) {
       soundPlayed.stop(); // Stop the current song
@@ -73,7 +73,7 @@ const LoggedInContainer = ({ children }) => {
       }
     }, 1000); // Cập nhật mỗi giây
 
-    return () => clearInterval(interval); // Dọn dẹp khi component unmount hoặc soundPlayed thay đổi
+    return () => clearInterval(interval);
   }, [soundPlayed]);
 
   useLayoutEffect(() => {
@@ -100,23 +100,22 @@ const LoggedInContainer = ({ children }) => {
   }, [currentSong, finalVolume]); // Trigger khi currentSong hoặc volume thay đổi
 
   const changeSong = (songSrc) => {
-    // Tạo một đối tượng Howl mới và phát bài hát mới
-    const sound = new Howl({
+    if (soundPlayed) {
+      soundPlayed.stop(); // Dừng bài nhạc hiện tại
+      soundPlayed.unload(); // Giải phóng tài nguyên
+    }
+
+    const newSound = new Howl({
       src: [songSrc],
       html5: true,
-      volume: finalVolume,
-      onplay: () => {
-        setDuration(sound.duration()); // Đặt thời gian tổng khi bài hát bắt đầu
-        updateCurrentTime(); // Bắt đầu cập nhật thời gian hiện tại
-      },
-      onend: () => {
-        setCurrentTime(0); // Đặt lại thời gian khi bài hát kết thúc
+      onload: () => {
+        // Lấy duration của bài hát sau khi tải xong
+        setDuration(newSound.duration());
       },
     });
 
-    setSoundPlayed(sound); // Lưu sound vào state
-    sound.play(); // Phát bài hát
-    setIsPaused(false); // Bài hát đang phát, không tạm dừng
+    setSoundPlayed(newSound);
+    newSound.play();
   };
 
   const playSound = () => {

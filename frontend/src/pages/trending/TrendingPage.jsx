@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { makeAuthenticatedGETRequest } from "../utils/serverHelper";
-import Navbar from "../components/Navbar";
+import { makeAuthenticatedGETRequest } from "../../utils/serverHelper";
+import Navbar from "../../components/Navbar";
 import { ArrowLeft, ArrowRight, Play, Search, Settings } from "lucide-react";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { SongCard } from "./SongCard";
 import LoggedInContainer from "@/containers/LoggedInContainer";
 import {
   Table,
@@ -24,7 +25,7 @@ import {
   YAxis,
   ResponsiveContainer,
 } from "recharts";
-import p1 from "../assets/Pictures/708a320ec3182cd3a629e98808e73fb5_2744128242798474951-removebg-preview.png";
+import p1 from "@/assets/Pictures/708a320ec3182cd3a629e98808e73fb5_2744128242798474951-removebg-preview.png";
 import { useColorModeValue } from "@chakra-ui/react"; // Import Chakra UI hook
 
 const menuItemsLeft = [
@@ -77,6 +78,7 @@ export default function TrendingPage() {
   const buttonColor = useColorModeValue("blue.500", "#9b4de0");
   const hoverButtonColor = useColorModeValue("blue.400", "#9b4de0");
   const headingColor = useColorModeValue("gray.900", "transparent");
+
   const headingGradient = useColorModeValue(
     "",
     "bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500"
@@ -85,12 +87,28 @@ export default function TrendingPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [soundPlayed, setSoundPlayed] = useState(null);
+  const [duration, setDuration] = useState(songData.duration || null);
 
+  useEffect(() => {
+    if (!songData.duration) {
+      const sound = new Howl({
+        src: [songData.track],
+        html5: true,
+      });
+
+      sound.on("load", () => {
+        setDuration(sound.duration());
+        sound.unload();
+      });
+    }
+  }, [songData]);
   useEffect(() => {
     const fetchSongs = async () => {
       try {
         setIsLoading(true);
-        const response = await makeAuthenticatedGETRequest("/song/get/mysongs");
+        const response = await makeAuthenticatedGETRequest(
+          "/song/get/allSongs"
+        );
         setSongData(response.data);
       } catch (err) {
         setError("Failed to fetch songs. Please try again later.");
@@ -105,19 +123,19 @@ export default function TrendingPage() {
   const handleMouseEnter = (data, index) => {
     setActiveIndex(index);
   };
-
-  const songs = [
-    { title: "Song 1", artist: "Artist 1", duration: "03:45" },
-    { title: "Song 2", artist: "Artist 2", duration: "04:00" },
-    { title: "Song 3", artist: "Artist 3", duration: "03:30" },
-    { title: "Song 4", artist: "Artist 4", duration: "04:20" },
-    { title: "Song 5", artist: "Artist 5", duration: "03:50" },
-  ];
+  console.log(songData);
+  const formatDuration = (durationInSeconds) => {
+    const minutes = Math.floor(durationInSeconds / 60);
+    let seconds = durationInSeconds % 60;
+    seconds = seconds.toFixed(0);
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  };
+  const formattedDuration = duration ? formatDuration(duration) : "M:SS";
 
   const regions = [
-    { region: "Việt Nam", songs: songs },
-    { region: "US-UK", songs: songs },
-    { region: "K-Pop", songs: songs },
+    { region: "Việt Nam", songs: songData },
+    { region: "US-UK", songs: songData },
+    { region: "K-Pop", songs: songData },
   ];
 
   return (
@@ -206,37 +224,22 @@ export default function TrendingPage() {
 
           {/* Song List */}
           <div className="space-y-4">
-            {songs.map((song, index) => (
-              <Card
-                key={index}
-                className={`bg-${cardBackground} hover:bg-${cardBackground}`}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-4">
-                    <span className="text-3xl font-bold text-gray-400 w-8">
-                      {index + 1}
-                    </span>
-                    <div className="w-10 h-10">
-                      <Avatar>
-                        <AvatarImage
-                          src={song.thumbnail || p1} // Provide fallback image or dynamically set the thumbnail
-                          alt="Thumbnail" // Alt text for the image
-                          className="w-16 h-16 bg-cover bg-center rounded-md"
-                        />
-                        <AvatarFallback>CN</AvatarFallback>
-                      </Avatar>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-lg font-semibold text-white">
-                        {song.title}
-                      </p>
-                      <p className="text-sm text-gray-400">{song.artist}</p>
-                    </div>
-                    <span className="text-gray-500">{song.duration}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            {isLoading ? (
+              <p className="text-center text-gray-400">Loading songs...</p>
+            ) : error ? (
+              <p className="text-center text-red-500">{error}</p>
+            ) : songData.length === 0 ? (
+              <p className="text-center text-gray-400">No songs found</p>
+            ) : (
+              songData.map((song, index) => (
+                <SongCard
+                  key={song._id || index}
+                  song={song}
+                  index={index}
+                  cardBackground={cardBackground}
+                />
+              ))
+            )}
           </div>
         </div>
       </LoggedInContainer>

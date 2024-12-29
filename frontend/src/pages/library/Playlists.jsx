@@ -21,7 +21,7 @@ const Playlists = () => {
     <div className="text-white px-8 pt-6">
       <div className="text-white text-xl pt-8 font-semibold">My Playlists</div>
       <div className="py-5 grid gap-5 grid-cols-5">
-        {myPlaylists.map((item) => {
+        {myPlaylists?.map((item) => {
           return (
             <Card
               key={JSON.stringify(item)}

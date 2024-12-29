@@ -25,7 +25,6 @@ export function Navbar({ menuItemsLeft, menuItemsRight }) {
       try {
         // Decode the token
         const decodedToken = jwtDecode(token);
-        console.log("Decoded token:", decodedToken);
 
         const userId = decodedToken.identifier; // Access the user ID from the token
 
@@ -37,7 +36,6 @@ export function Navbar({ menuItemsLeft, menuItemsRight }) {
             );
 
             setUserData(response); // `response` contains the user data directly
-            console.log("User data:", response);
           } catch (err) {
             setError("Failed to fetch user data. Please try again later.");
             console.error("Error fetching user data:", err);

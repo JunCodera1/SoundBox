@@ -28,6 +28,7 @@ export const createPlaylist = async (req, res) => {
     const playlist = await Playlist.create(playlistData);
     return res.status(200).send(playlist);
   } catch (error) {
+    console.log(currentUser);
     console.error("Error creating playlist:", error);
     return res.status(500).send({ err: "Failed to create playlist" });
   }
@@ -80,10 +81,26 @@ export const updatePlaylistById = async (req, res) => {
 };
 
 export const getPlaylistCurrentUser = async (req, res) => {
-  const artistId = req.user._id;
+  try {
+    const artistId = req.user._id;
+    console.log("Artist ID:", artistId);
 
-  const playlists = await Playlist.find({ owner: artistId }).populate("owner");
-  return res.status(200).json({ data: playlists });
+    // Find playlists associated with the artist
+    const playlists = await Playlist.find({ owner: artistId }).populate(
+      "owner"
+    );
+
+    if (!playlists || playlists.length === 0) {
+      return res.status(404).json({ err: "No playlists found for the user" });
+    }
+
+    return res.status(200).json({ data: playlists });
+  } catch (error) {
+    console.error("Error fetching playlists for user:", error);
+    return res
+      .status(500)
+      .json({ err: "Server error while fetching playlists" });
+  }
 };
 
 export const getPlaylistByArtistId = async (req, res) => {
@@ -100,60 +117,34 @@ export const getPlaylistByArtistId = async (req, res) => {
 };
 
 export const addSongToPlaylist = async (req, res) => {
+  const { playlistId, songId } = req.params;
+
+  if (!playlistId || !songId) {
+    return res.status(400).json({ error: "Playlist ID or Song ID is missing" });
+  }
+
+  // Fetch playlist and song by ID
+  const playlist = await Playlist.findById(playlistId);
+  const song = await Song.findById(songId);
+
+  if (!playlist || !song) {
+    return res.status(404).json({ error: "Playlist or Song not found" });
+  }
+
+  // Add the song to the playlist
   try {
-    const currentUser = req.user;
-    const { playlistId, songId } = req.params;
-
-    // Step 0: Check if playlistId and songId are valid ObjectIds
-    if (
-      !mongoose.Types.ObjectId.isValid(playlistId) ||
-      !mongoose.Types.ObjectId.isValid(songId)
-    ) {
-      return res.status(400).json({ error: "Invalid playlist or song ID" });
-    }
-
-    // Step 1: Get the playlist if valid
-    const playlist = await Playlist.findById(playlistId);
-    if (!playlist) {
-      return res.status(404).json({ error: "Playlist does not exist" });
-    }
-
-    // Step 2: Check if currentUser owns the playlist or is a collaborator
-    if (
-      !playlist.owner.equals(currentUser._id) &&
-      !playlist.collaborators.includes(currentUser._id)
-    ) {
-      return res
-        .status(403)
-        .json({ error: "You are not allowed to modify this playlist" });
-    }
-
-    // Step 3: Check if the song is a valid song
-    const song = await Song.findById(songId);
-    if (!song) {
-      return res.status(404).json({ error: "Song does not exist" });
-    }
-
-    // Step 4: Avoid duplicate entries in the playlist
-    if (playlist.songs.includes(songId)) {
-      return res
-        .status(400)
-        .json({ error: "Song already exists in the playlist" });
-    }
-
-    // Step 5: Add the song to the playlist
-    playlist.songs.push(songId);
+    playlist.songs.push(songId); // Assuming there's a 'songs' array in the Playlist schema
     await playlist.save();
-
     return res
       .status(200)
-      .json({ message: "Song added successfully", playlist });
+      .json({ message: "Song added to playlist successfully" });
   } catch (error) {
     console.error("Error adding song to playlist:", error);
-    return res.status(500).json({ error: "An unexpected error occurred" });
+    return res
+      .status(500)
+      .json({ error: "Server error while adding song to playlist" });
   }
 };
-
 export const getPlaylistByName = async (req, res) => {
   const { playlistName } = req.params;
 

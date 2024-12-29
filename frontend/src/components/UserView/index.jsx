@@ -13,7 +13,7 @@ const UserView = ({ titleText }) => {
       try {
         setLoading(true);
         const response = await makeAuthenticatedGETRequest("/user/get/users");
-        setUsers(response.data.slice(0, 5)); // Limit to the first 5 users
+        setUsers(response.data); // Limit to the first 5 users
         setLoading(false);
       } catch (error) {
         setError("Failed to fetch users");
@@ -45,15 +45,9 @@ const UserView = ({ titleText }) => {
         <Box overflowX="auto" whiteSpace="nowrap" ml="5">
           <div className="flex gap-6">
             {Array.isArray(users) &&
-              users.map((user, index) => (
+              users?.map((user, index) => (
                 <div key={user.id} className="flex-shrink-0">
-                  <UserCard
-                    username={user.username}
-                    avatar={user.avatar}
-                    bio={user.bio}
-                    followersCount={user.followersCount}
-                    playlistsCount={user.playlistsCount}
-                  />
+                  <UserCard info={user} />
                 </div>
               ))}
           </div>
