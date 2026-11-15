@@ -82,4 +82,20 @@ describe("player store", () => {
     expect(usePlayer.getState().playing).toBe(false); expect(usePlayer.getState().sleepAt).toBeNull();
     vi.useRealTimers();
   });
+  it("a saved seek position is not applied to a different track", async () => {
+    localStorage.setItem("sb.player.v1", JSON.stringify({ queue: [song("a"), song("b")], index: 0, currentTime: 42, volume: 0.5 }));
+    vi.resetModules(); instances.length = 0;
+    const p = (await import("@/stores/player")).usePlayer;
+    p.getState().next(); await flush();            // user skips before pressing play on the restored track
+    instances[0].dispatchEvent(new Event("loadedmetadata"));
+    expect(instances[0].currentTime).toBe(0);
+  });
+  it("a saved seek position IS applied to the restored track", async () => {
+    localStorage.setItem("sb.player.v1", JSON.stringify({ queue: [song("a"), song("b")], index: 0, currentTime: 42, volume: 0.5 }));
+    vi.resetModules(); instances.length = 0;
+    const p = (await import("@/stores/player")).usePlayer;
+    p.getState().toggle(); await flush();
+    instances[0].dispatchEvent(new Event("loadedmetadata"));
+    expect(instances[0].currentTime).toBe(42);
+  });
 });

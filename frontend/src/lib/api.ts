@@ -18,6 +18,7 @@ export async function api<T = any>(path: string, opts: Opts = {}): Promise<T> {
   }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
+    if (res.status >= 502 && res.status <= 504) throw new ApiError(res.status, "The SoundBox server is unreachable right now. Try again in a moment.");
     if (res.status === 401) window.dispatchEvent(new Event("sb:unauthorized"));
     throw new ApiError(res.status, data.error || `Request failed (${res.status})`);
   }

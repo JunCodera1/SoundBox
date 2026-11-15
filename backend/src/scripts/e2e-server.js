@@ -13,3 +13,6 @@ await mongoose.connection.dropDatabase();
 const { seed } = await import("./seed.js");
 console.log("[e2e] seeded", await seed());
 await import("../server.js");
+
+const cleanup = async () => { try { await mongoose.connection.dropDatabase(); } catch { /* ignore */ } fs.rmSync(process.env.UPLOAD_DIR, { recursive: true, force: true }); process.exit(0); };
+process.on("SIGTERM", cleanup); process.on("SIGINT", cleanup);

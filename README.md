@@ -33,4 +33,5 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/FEATURES.md](docs/FEATUR
 
 ## Configuration (`backend/.env`)
 See [.env.example](.env.example). `JWT_SECRET` is mandatory in production. Never commit `.env`.
+Upgrading from v1? Back up (`mongodump`), then `node backend/src/scripts/migrate-v1.js` (dry run) and `--apply`. See docs/PROJECT_AUDIT.md.
 Original v1 code is preserved at git tag `legacy-v1`. `translaher/` is an unrelated Astro project left untouched.

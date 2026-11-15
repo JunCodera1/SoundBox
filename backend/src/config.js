@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-dotenv.config({ path: path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.env") });
+dotenv.config({ path: path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../.env") });
 
 const isProd = process.env.NODE_ENV === "production";
 const isTest = process.env.NODE_ENV === "test";
@@ -21,6 +21,8 @@ export const config = {
   port: Number(process.env.PORT) || 5000,
   mongoUri: process.env.MONGODB_URI || `mongodb://127.0.0.1:27017/${isTest ? "soundbox_test" : "soundbox_dev"}`,
   jwtSecret,
+  // Number of reverse-proxy hops to trust for X-Forwarded-For (0 = none, safe default when exposed directly).
+  trustProxy: Number(process.env.TRUST_PROXY || 0),
   clientUrl: process.env.CLIENT_URL || "http://localhost:5173",
   uploadDir: path.resolve(process.env.UPLOAD_DIR || path.join(path.dirname(fileURLToPath(import.meta.url)), "../uploads")),
   maxAudioBytes: 30 * 1024 * 1024,

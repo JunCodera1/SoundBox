@@ -29,9 +29,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
         <Route element={<Layout />}>
+          <Route path="login" element={<LoginPage />} />
+          <Route path="signup" element={<SignupPage />} />
           <Route index element={<HomePage />} />
           <Route path="search" element={<Suspense fallback={<Loading />}><SearchPage /></Suspense>} />
           <Route path="playlist/:id" element={<Suspense fallback={<Loading />}><PlaylistPage /></Suspense>} />

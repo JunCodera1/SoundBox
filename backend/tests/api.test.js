@@ -65,6 +65,14 @@ describe("songs & uploads", () => {
     expect(exe.status).toBe(400);
     expect(fs.readdirSync(path.join(config.uploadDir, "audio"))).toHaveLength(0); // nothing left behind
   });
+  it("rejects an oversized cover image and leaves no files behind", async () => {
+    const before = fs.readdirSync(path.join(config.uploadDir, "audio")).length;
+    const big = Buffer.alloc(config.maxImageBytes + 1024);
+    const r = await alice.post("/api/songs").field("name", "Big").field("genre", "X").field("rightsConfirmed", "true").attach("audio", wavBuf(), { filename: "a.wav", contentType: "audio/wav" }).attach("cover", big, { filename: "c.png", contentType: "image/png" });
+    expect(r.status).toBe(400); expect(r.body.error).toMatch(/Cover/);
+    expect(fs.readdirSync(path.join(config.uploadDir, "audio"))).toHaveLength(before);
+    expect(fs.readdirSync(path.join(config.uploadDir, "images"))).toHaveLength(0);
+  });
   it("uploads a song and serves it with Range support", async () => {
     const r = await alice.post("/api/songs").field("name", "My Track").field("genre", "Ambient").field("rightsConfirmed", "true").field("duration", "30").attach("audio", wavBuf(), { filename: "../../x.wav", contentType: "audio/wav" });
     expect(r.status).toBe(201);
@@ -152,5 +160,38 @@ describe("social, privacy, admin, assistant", () => {
     expect(r.body.mode).toBe("local");
     expect(r.body.songs.map((s) => s.name)).toContain("Quiet Night");
     expect((await alice.post("/api/discover/assistant").send({ prompt: "zzzz qqqq" })).body.songs).toHaveLength(0);
+  });
+});
+
+describe("v1 data compatibility (fixtures shaped like SoundBox v1 documents)", () => {
+  it("migrate-v1: dry-run changes nothing, --apply makes v1 users/likes/history work in v2", async () => {
+    const { migrateV1 } = await import("../src/scripts/migrate-v1.js");
+    const bcrypt = (await import("bcryptjs")).default;
+    const db = mongoose.connection.db;
+    const hash = await bcrypt.hash("OldPassw0rd", 10);
+    const [u1, u2] = [new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()];
+    const songId = new mongoose.Types.ObjectId();
+    await db.collection("users").insertMany([
+      { _id: u1, email: "Legacy.User@Example.COM", username: "legacy_one", password: hash, isAdmin: false, likedSongs: [], recentlyPlayed: [{ song: songId, playedAt: new Date() }], followers: [], following: [] },
+      { _id: u2, email: "other@example.com", username: "legacy_two", password: hash, likedSongs: [], followers: [], following: [] },
+    ]);
+    await db.collection("songs").insertOne({ _id: songId, name: "Old Song", thumbnail: "https://x/y.jpg", track: "https://x/y.mp3", genre: "Rock", artist: u2, likes: 5, likedBy: [u1], comments: [] });
+    await db.collection("comments").insertOne({ user: u1, post: new mongoose.Types.ObjectId(), comment: "legacy comment" });
+
+    const before = await request(app).post("/api/auth/login").send({ email: "Legacy.User@Example.COM", password: "OldPassw0rd" });
+    expect(before.status).toBe(401); // v1 mixed-case email isn't found until migrated
+
+    const dry = await migrateV1({ apply: false });
+    expect(dry.report).toMatchObject({ emailsLowercased: 1, likesMigrated: 1, historyMigrated: 1, legacyCommentsUntouched: 1 });
+    expect((await db.collection("users").findOne({ _id: u1 })).email).toBe("Legacy.User@Example.COM");
+
+    await migrateV1({ apply: true });
+    const a = agent();
+    expect((await a.post("/api/auth/login").send({ email: "Legacy.User@Example.COM", password: "OldPassw0rd" })).status).toBe(200); // v1 bcryptjs hash still valid
+    expect((await a.get("/api/me/favorites")).body.items.map((x) => x.name)).toEqual(["Old Song"]);
+    expect((await a.get("/api/me/history")).body.items).toHaveLength(1);
+    const song = (await request(app).get(`/api/songs/${songId}`)).body.song;
+    expect(song.likes).toBe(1); expect(song.track).toBe("https://x/y.mp3"); // external v1 URLs still playable
+    expect((await migrateV1({ apply: true })).report).toMatchObject({ emailsLowercased: 0, likesMigrated: 0, historyMigrated: 0 }); // idempotent
   });
 });

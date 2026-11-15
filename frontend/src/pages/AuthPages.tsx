@@ -5,7 +5,7 @@ import { useAuth } from "@/stores/auth";
 
 function Shell({ title, children, foot }: { title: string; children: React.ReactNode; foot: React.ReactNode }) {
   return (
-    <div className="flex min-h-full items-center justify-center p-4">
+    <div className="flex min-h-[70vh] items-center justify-center py-4">
       <div className="w-full max-w-sm"><Link to="/" className="mb-8 flex justify-center"><Logo size={34} /></Link>
         <div className="card p-6"><h1 className="h-section mb-4 text-2xl">{title}</h1>{children}</div><p className="mt-4 text-center text-sm text-mute">{foot}</p></div>
     </div>

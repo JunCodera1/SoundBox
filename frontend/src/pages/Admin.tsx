@@ -16,7 +16,7 @@ export default function AdminPage() {
         <div className="card overflow-x-auto"><table className="w-full text-left text-sm"><thead className="text-xs uppercase text-mute"><tr><th className="p-3">Username</th><th className="p-3">Email</th><th className="p-3">Role</th><th className="p-3">Joined</th></tr></thead>
           <tbody>{users.data!.items.map((u) => <tr key={u.id} className="border-t border-line"><td className="p-3">{u.username}</td><td className="p-3">{u.email}</td><td className="p-3">{u.isAdmin ? "Admin" : "User"}</td><td className="p-3">{new Date(u.createdAt).toLocaleDateString()}</td></tr>)}</tbody></table></div>
       )}
-      <p className="mt-4 text-xs text-mute">Admins can also delete any song or comment from the song menu. Admin rights are granted in the database only.</p>
+      <p className="mt-4 text-xs text-mute">Admins can delete any song from its menu and any comment from the full player. Admin rights are granted in the database only.</p>
     </>
   );
 }

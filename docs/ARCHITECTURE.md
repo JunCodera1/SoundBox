@@ -21,6 +21,6 @@ frontend/src
 
 **Uploads:** multer, MIME allow-list (audio ≤30 MB, image ≤5 MB), random server-side filenames with extension derived from MIME, files removed on validation failure and on song deletion, explicit "I have the rights" confirmation.
 
-**Data decisions:** likes live in `user.likedSongs` (source of truth) + a `song.likes` counter updated only when the set really changes; plays are a `Play` collection (deduped per user/song/minute). Legacy collections/field names are kept; new fields have defaults (privacy defaults to private activity, playlists private).
+**Data decisions (v1 compatibility: see PROJECT_AUDIT.md; use `scripts/migrate-v1.js`):** likes live in `user.likedSongs` (source of truth) + a `song.likes` counter updated only when the set really changes; plays are a `Play` collection (deduped per user/song/minute). Collections `users`/`songs`/`playlists` are reused; new fields have defaults (privacy defaults to private activity, playlists private).
 
 **Player rules:** the audio element is created once; a load token discards stale async work; autoplay-blocked and 404/decoding errors surface in the UI and auto-skip (bounded); state persists to localStorage and restores *paused*; Media Session API integration.

@@ -12,7 +12,7 @@ import { useAuth } from "@/stores/auth";
 import { plural } from "@/lib/format";
 import type { Playlist, Song } from "@/lib/types";
 
-const TABS = [["favorites", "Favorites"], ["playlists", "Playlists"], ["history", "History"], ["uploads", "My uploads"]] as const;
+const TABS = [["favorites", "Favorites"], ["playlists", "Playlists"], ["history", "History"], ["following", "Following"], ["uploads", "My uploads"]] as const;
 
 export default function LibraryPage() {
   const [params, setParams] = useSearchParams();
@@ -23,7 +23,7 @@ export default function LibraryPage() {
       <div role="tablist" className="mb-6 flex gap-1 overflow-x-auto border-b border-line">
         {TABS.map(([k, l]) => <button key={k} role="tab" aria-selected={tab === k} onClick={() => setParams({ tab: k })} className={`-mb-px whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium ${tab === k ? "border-accent text-ink" : "border-transparent text-mute hover:text-ink"}`}>{l}</button>)}
       </div>
-      {tab === "favorites" && <Favorites />}{tab === "playlists" && <Playlists />}{tab === "history" && <History />}{tab === "uploads" && <Uploads />}
+      {tab === "favorites" && <Favorites />}{tab === "playlists" && <Playlists />}{tab === "history" && <History />}{tab === "following" && <Following />}{tab === "uploads" && <Uploads />}
     </>
   );
 }
@@ -58,6 +58,13 @@ function History() {
       <Confirm open={confirm} title="Clear listening history?" body="This permanently removes your play history and resets your taste summary." confirmLabel="Clear" onClose={() => setConfirm(false)} onConfirm={async () => { try { await api("/me/history", { method: "DELETE" }); toast("History cleared"); reload(); taste.reload(); } catch (e) { toast((e as Error).message, "error"); } }} />
     </>
   );
+}
+
+function Following() {
+  const { data, loading, error, reload } = useAsync((s) => api<{ items: { id: string; username: string; followers: number }[] }>("/me/following", { signal: s }), []);
+  if (loading) return <Loading />; if (error) return <ErrorState message={error} onRetry={reload} />;
+  if (!data?.items.length) return <Empty title="You're not following anyone" hint="Follow artists from their profile to find them here." action={<Link to="/search" className="btn-primary mt-2">Find artists</Link>} />;
+  return <ul className="grid grid-cols-2 gap-4 sm:grid-cols-4">{data.items.map((a) => <li key={a.id}><Link to={`/u/${a.id}`} className="group block text-center"><Cover seed={a.username} className="mx-auto w-full max-w-32" rounded="rounded-full" /><p className="mt-2 truncate text-sm font-medium group-hover:underline">{a.username}</p><p className="text-xs text-mute">{plural(a.followers, "follower")}</p></Link></li>)}</ul>;
 }
 
 function Uploads() {

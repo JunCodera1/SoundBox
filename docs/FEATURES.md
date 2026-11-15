@@ -8,10 +8,10 @@
 | Mini player + expanded player (mobile-friendly), sleep timer | ✅ sleep timer unit-tested; UI manually screenshotted |
 | Catalog browse, genre browse, search (songs/artists/playlists/suggestions) | ✅ verified |
 | Favorites, history, taste summary (genres/artists/week-over-week from real plays), recommendations from taste | ✅ API verified; recommendations not UI-tested |
-| Playlists: create, add/remove, reorder (API), public/private, share by link | ✅ API; reorder has no drag UI |
+| Playlists: create, add/remove, reorder (API), public/private, share by link | ✅ API; reorder has no drag UI; rename/description edit ✅ e2e |
 | Upload (local storage) with rights confirmation | ✅ API verified; UI upload not e2e-tested |
-| Profiles, follow/unfollow, privacy controls (activity hidden by default) | ✅ API verified |
-| Comments on songs | ✅ API verified; **no UI yet** |
+| Profiles, follow/unfollow, Following list, privacy controls (activity hidden by default) | ✅ API verified; Following list e2e (empty state only) |
+| Comments on songs (full-player panel), author/admin delete | ✅ API + e2e (post) |
 | Mix Maker (local keyword/genre matcher over the real catalog) | ✅ verified — not an LLM |
 | Admin: stats + user list, enforced by server | ✅ API verified; UI not e2e-tested |
 

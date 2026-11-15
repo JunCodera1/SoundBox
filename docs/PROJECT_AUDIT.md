@@ -31,6 +31,27 @@ Collections/field names (`users`, `songs`, `playlists`, `comments`, `posts`) and
 ## Decision: incremental where it pays, rewrite where the code is unsalvageable
 Same stack (Express/Mongoose/Vite/React/Tailwind/zustand). The backend was rewritten in place under `backend/src` with the same collections; the frontend shell was rebuilt (one UI system) because the legacy build is broken and the code mixes five UI libraries. Legacy code stays recoverable via tag `legacy-v1`.
 
+## v1 → v2 feature inventory (from reading every v1 controller via `git show legacy-v1:…`)
+| v1 feature | v1 reality | v2 |
+|---|---|---|
+| Signup / login | two incompatible cookie/JWT schemes, `secure:true` cookie on http, password logged | **Replaced**: one httpOnly-cookie JWT, same-error login, rate limited |
+| Email verification, forgot/reset password | existed (Mailtrap/nodemailer); needs SMTP credentials; reset flow noted as broken in git history ("can't login after") | **Dropped** (needs credentials); documented limitation |
+| OAuth (Google/Facebook), Clerk | passport strategies/Clerk partly removed ("remove clerk" commit), no working flow | **Dropped** |
+| Songs CRUD, genre/name lookup, like/unlike | worked on paper; Cloudinary-hosted URLs; likes stored in 3 places; no ownership check on update/delete | **Kept & fixed** (ownership enforced, single like source of truth, filter/search by genre/name) |
+| Upload to Cloudinary | needs credentials | **Replaced** by local upload (limits, MIME allow-list, rights confirmation). External v1 `https://` track URLs still play |
+| Playlists CRUD, add song | no privacy, loose ownership | **Kept & fixed**; added public/private, reorder, remove |
+| Follow/unfollow | `followUser` trusted `currentUserId` from the request body (anyone could make anyone follow) | **Kept & fixed** (identity from session); Following list added |
+| Comments | controller wrote `{user,text,song}` but the model required `{post,comment}` ⇒ could not work; admin comment manager = mock data | **Replaced**: song comments (UI in full player), author/admin delete |
+| Feed posts (`Post`) with external track URL | worked only with Cloudinary uploads; comments on posts broken as above | **Dropped** (overlaps with songs + comments); old `posts` documents are left untouched |
+| Search route | imported non-existent model files, never mounted | **Replaced** (songs/artists/playlists/suggestions) |
+| Orders / PayPal / Stripe / Store / Premium | `order.controller` is a copy of an LMS ("courses", `require` in an ESM project, never mounted) | **Dropped** — no working payments existed |
+| Admin dashboard | purchased template with mock JSON; no server-side check | **Replaced** by a minimal real page (stats, users) behind `isAdmin` enforced by the API |
+| AI page | static page | **Replaced** by local Mix Maker (no external AI) |
+| Recently played / stats on the user model | `updateListeningStats` was never called | **Replaced** by a `Play` collection, history, taste summary |
+
+## Data compatibility with v1 databases
+v2 reuses the same collections (`users`, `songs`, `playlists`). Differences: v2 looks up users by **lowercase** e-mail; likes are read from `user.likedSongs`; history lives in `plays`; v1 playlists have no `isPublic` so they become **private**; v1 `comments`/`posts` are not convertible and are left untouched. `node backend/src/scripts/migrate-v1.js` (dry-run by default, `--apply` to write, additive only, idempotent) fixes e-mails/likes/history; it is covered by a test using v1-shaped fixtures. It has **not** been run against a real v1 production database — take a `mongodump` first.
+
 ## Outcome (v2)
 Fixes 1–12 above were addressed by the rewrite (see ARCHITECTURE.md). Items 13–14: Cloudinary replaced by local uploads; Store/Payment/AI-page/feed/admin-template removed because they had no working backend or only mock data (recoverable at `legacy-v1`).
 

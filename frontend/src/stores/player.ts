@@ -32,6 +32,8 @@ let countedFor: string | null = null;
 let failStreak = 0;
 let sleepTimeout: ReturnType<typeof setTimeout> | undefined;
 let pendingSeek: number | null = typeof saved.currentTime === "number" ? saved.currentTime : null;
+// The saved position only belongs to the track that was saved with it.
+const restoredId: string | null = Array.isArray(saved.queue) ? saved.queue[saved.index ?? 0]?.id ?? null : null;
 
 export const getAudio = () => audio;
 
@@ -98,6 +100,7 @@ export const usePlayer = create<PlayerState>((set, get) => {
     const s = get().current(); if (!s) return;
     const a = A(); const token = ++loadToken;
     if (loadedId !== s.id) {
+      if (s.id !== restoredId) pendingSeek = null;
       loadedId = s.id; countedFor = null;
       set({ loading: true, error: null, currentTime: 0, duration: s.duration || 0 });
       a.src = s.track; a.load();

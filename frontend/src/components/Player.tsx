@@ -4,6 +4,7 @@ import { Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Repeat1, Volume2, 
 import { usePlayer } from "@/stores/player";
 import { Cover } from "./Cover";
 import { LikeButton } from "./SongRow";
+import { Comments } from "./Comments";
 import { fmtTime } from "@/lib/format";
 
 function Seek({ className = "" }: { className?: string }) {
@@ -119,6 +120,7 @@ export function PlayerBar() {
             <div className="flex justify-center"><Volume /></div>
             <p className="text-center text-xs text-mute">Lyrics aren't available for this catalog.</p>
             <div className="card p-3"><h3 className="mb-2 flex items-center gap-2 text-sm font-semibold"><ListMusic size={16} />Queue</h3><Queue /></div>
+            <Comments songId={song.id} />
           </div>
         </div>
       )}

@@ -94,6 +94,24 @@ test.describe.serial("SoundBox critical journey", () => {
     await expect.poll(() => timeNow(page), { timeout: 10000 }).toBeGreaterThan(a);
   });
 
+  test("7b. comment on the playing track, edit playlist, following tab", async () => {
+    await page.getByRole("region", { name: "Player" }).getByRole("button", { name: "Open full player" }).click();
+    await page.getByLabel("Add a comment").fill("great track");
+    await page.getByRole("button", { name: "Post" }).click();
+    await expect(page.getByText("great track")).toBeVisible();
+    await page.getByRole("button", { name: "Close player" }).click();
+    await page.getByRole("link", { name: "Library" }).first().click();
+    await page.getByRole("tab", { name: "Playlists" }).click();
+    await page.getByRole("link", { name: /Night Drive/ }).click();
+    await page.getByRole("button", { name: "Edit" }).click();
+    await page.getByLabel("Name").fill("Night Drive II");
+    await page.getByRole("button", { name: "Save" }).click();
+    await expect(page.getByRole("heading", { name: "Night Drive II" })).toBeVisible();
+    await page.getByRole("link", { name: "Library" }).first().click();
+    await page.getByRole("tab", { name: "Following" }).click();
+    await expect(page.getByText("You're not following anyone")).toBeVisible();
+  });
+
   test("8. keyboard shortcut toggles playback", async () => {
     const bar = page.getByRole("region", { name: "Player" });
     await page.locator("body").click({ position: { x: 700, y: 400 } });

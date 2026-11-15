@@ -5,6 +5,7 @@ import { HttpError, parse, wrap, idParam, escapeRegex } from "../utils/http.js";
 import { requireAuth } from "../middleware/auth.js";
 import { songDto } from "../services/present.js";
 import { upload, removeUploaded } from "../services/upload.js";
+import { config } from "../config.js";
 
 const router = Router();
 const populateArtist = { path: "artist", select: "username avatar" };
@@ -69,6 +70,7 @@ router.post("/", requireAuth, upload, wrap(async (req, res) => {
   const audio = files.audio?.[0], cover = files.cover?.[0];
   try {
     if (!audio) throw new HttpError(400, "An audio file is required");
+    if (cover && cover.size > config.maxImageBytes) throw new HttpError(400, "Cover image is larger than 5 MB");
     const b = parse(createSchema, req.body);
     const song = await Song.create({
       name: b.name, genre: b.genre, description: b.description, duration: b.duration,

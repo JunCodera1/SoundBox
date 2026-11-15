@@ -2,7 +2,7 @@ import { Router } from "express";
 import { Song, User, Play } from "../models/index.js";
 import { wrap, idParam, HttpError } from "../utils/http.js";
 import { requireAuth } from "../middleware/auth.js";
-import { songDto } from "../services/present.js";
+import { songDto, publicUser } from "../services/present.js";
 import { tasteProfile } from "../services/taste.js";
 
 const router = Router();
@@ -35,6 +35,11 @@ router.get("/history", wrap(async (req, res) => {
 router.delete("/history", wrap(async (req, res) => {
   const r = await Play.deleteMany({ user: req.user._id });
   res.json({ ok: true, removed: r.deletedCount });
+}));
+
+router.get("/following", wrap(async (req, res) => {
+  const u = await User.findById(req.user._id).populate("following", "username avatar bio followers following");
+  res.json({ items: u.following.filter(Boolean).map(publicUser) });
 }));
 
 router.get("/taste", wrap(async (req, res) => res.json(await tasteProfile(req.user._id))));
