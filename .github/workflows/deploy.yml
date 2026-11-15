@@ -1,0 +1,16 @@
+name: Deploy
+# Runs after CI succeeds on main. Does nothing until RENDER_DEPLOY_HOOK_URL is added as a repository secret.
+on:
+  workflow_run: { workflows: [CI], types: [completed], branches: [main] }
+permissions: { contents: read }
+jobs:
+  render:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    env:
+      HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+    steps:
+      - name: Trigger Render deploy
+        run: |
+          if [ -z "$HOOK" ]; then echo "RENDER_DEPLOY_HOOK_URL not set; skipping deploy."; exit 0; fi
+          curl -fsS -X POST "$HOOK" >/dev/null && echo "Deploy triggered."

@@ -1,121 +1,35 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-
-body {
-    font-family: 'Roboto', sans-serif;
-    margin: 0;
-}
-
-a {
-    text-decoration: none;
-    color: inherit;
-}
-
-code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
-}
-
+/* SoundBox identity: warm "late-night studio" — charcoal with an amber signal accent. */
 :root {
-    --primary-color: #1ed760;
-    --black: #0000;
-    --white: #fff;
-    --gray: #9b9b9b;
-    --blue: #2941ab;
-    --sky-blue: #1877f2;
-    --dark-green: #15883e;
-    --light-gray: #616467;
-    --light-white: #919496;
-    --light-black: #282828;
-    --light-black: #ffcdd2;
-    --mini-black: #181818;
-    --gradient-gary: #535353;
-
-    --error: #cc0000;
-    --toastify-toast-min-height: 5rem;
-
-
+  --bg: 20 17 15; --surface: 29 25 22; --raised: 41 36 31; --line: 58 52 45;
+  --ink: 244 239 231; --mute: 160 151 139; --accent: 255 180 84; --accent-ink: 28 18 4; --danger: 255 110 100;
+  color-scheme: dark;
 }
-
-.Toastify__toast-theme--colored.Toastify__toast--success {
-    background: var(--blue);
-    font-size: 1.4rem;
-    font-weight: 600;
-    text-align: center;
-    border-radius: 1rem;
+:root[data-theme="light"] {
+  --bg: 250 247 242; --surface: 255 255 255; --raised: 240 235 227; --line: 218 210 198;
+  --ink: 32 27 22; --mute: 104 95 84; --accent: 196 108 0; --accent-ink: 255 255 255; --danger: 190 50 40;
+  color-scheme: light;
 }
+html, body, #root { height: 100%; }
+body { @apply bg-bg text-ink font-sans antialiased; margin: 0; overscroll-behavior: none; }
+:focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; border-radius: 6px; }
+* { scrollbar-width: thin; scrollbar-color: rgb(var(--line)) transparent; }
 
-.Toastify__toast-theme--colored.Toastify__toast--error {
-    background: var(--error);
-    font-size: 1.4rem;
-    font-weight: 600;
-    text-align: center;
-    border-radius: 1rem;
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50 disabled:pointer-events-none; }
+  .btn-primary { @apply btn bg-accent text-accent-ink hover:brightness-110; }
+  .btn-ghost { @apply btn bg-raised text-ink hover:bg-line; }
+  .btn-danger { @apply btn bg-danger/15 text-danger hover:bg-danger/25; }
+  .icon-btn { @apply inline-flex h-9 w-9 items-center justify-center rounded-full text-mute transition-colors hover:text-ink hover:bg-raised disabled:opacity-40 disabled:pointer-events-none; }
+  .field { @apply w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink placeholder:text-mute focus:border-accent outline-none; }
+  .label { @apply mb-1 block text-xs font-medium uppercase tracking-wide text-mute; }
+  .card { @apply rounded-xl border border-line bg-surface; }
+  .h-page { @apply font-display text-3xl font-bold tracking-tight md:text-4xl; }
+  .h-section { @apply font-display text-xl font-semibold tracking-tight; }
 }
-
-@layer base {
-  :root {
-        --background: 0 0% 100%;
-        --foreground: 240 10% 3.9%;
-        --card: 0 0% 100%;
-        --card-foreground: 240 10% 3.9%;
-        --popover: 0 0% 100%;
-        --popover-foreground: 240 10% 3.9%;
-        --primary: 240 5.9% 10%;
-        --primary-foreground: 0 0% 98%;
-        --secondary: 240 4.8% 95.9%;
-        --secondary-foreground: 240 5.9% 10%;
-        --muted: 240 4.8% 95.9%;
-        --muted-foreground: 240 3.8% 46.1%;
-        --accent: 240 4.8% 95.9%;
-        --accent-foreground: 240 5.9% 10%;
-        --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 240 5.9% 90%;
-        --input: 240 5.9% 90%;
-        --ring: 240 10% 3.9%;
-        --chart-1: 12 76% 61%;
-        --chart-2: 173 58% 39%;
-        --chart-3: 197 37% 24%;
-        --chart-4: 43 74% 66%;
-        --chart-5: 27 87% 67%;
-        --radius: 0.5rem;
-    }
-  .dark {
-        --background: 240 10% 3.9%;
-        --foreground: 0 0% 98%;
-        --card: 240 10% 3.9%;
-        --card-foreground: 0 0% 98%;
-        --popover: 240 10% 3.9%;
-        --popover-foreground: 0 0% 98%;
-        --primary: 0 0% 98%;
-        --primary-foreground: 240 5.9% 10%;
-        --secondary: 240 3.7% 15.9%;
-        --secondary-foreground: 0 0% 98%;
-        --muted: 240 3.7% 15.9%;
-        --muted-foreground: 240 5% 64.9%;
-        --accent: 240 3.7% 15.9%;
-        --accent-foreground: 0 0% 98%;
-        --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 240 3.7% 15.9%;
-        --input: 240 3.7% 15.9%;
-        --ring: 240 4.9% 83.9%;
-        --chart-1: 220 70% 50%;
-        --chart-2: 160 60% 45%;
-        --chart-3: 30 80% 55%;
-        --chart-4: 280 65% 60%;
-        --chart-5: 340 75% 55%;
-    }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-    }
-  body {
-    @apply bg-background text-foreground;
-    }
-}
+dialog { @apply rounded-2xl border border-line bg-surface p-0 text-ink; max-width: min(92vw, 28rem); width: 100%; }
+dialog::backdrop { background: rgb(0 0 0 / 0.6); }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
