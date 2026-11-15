@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: soundbox
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm --prefix frontend ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: false   # deploys are triggered by GitHub Actions after CI passes
+    envVars:
+      - { key: NODE_ENV, value: production }
+      - { key: TRUST_PROXY, value: "1" }
+      - { key: JWT_SECRET, generateValue: true }
+      - { key: MONGODB_URI, sync: false }   # paste your Atlas connection string in the Render dashboard
+      - { key: CLIENT_URL, sync: false }    # e.g. https://soundbox.onrender.com

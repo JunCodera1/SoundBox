@@ -35,3 +35,11 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/FEATURES.md](docs/FEATUR
 See [.env.example](.env.example). `JWT_SECRET` is mandatory in production. Never commit `.env`.
 Upgrading from v1? Back up (`mongodump`), then `node backend/src/scripts/migrate-v1.js` (dry run) and `--apply`. See docs/PROJECT_AUDIT.md.
 Original v1 code is preserved at git tag `legacy-v1`. `translaher/` is an unrelated Astro project left untouched.
+
+## Deploy (GitHub Actions → Render + MongoDB Atlas)
+1. Create a free **MongoDB Atlas** cluster, a DB user, and allow Render's IPs (or 0.0.0.0/0 for a hobby setup). Copy the connection string, with a database name such as `soundbox`.
+2. In **Render**: New → Blueprint → pick this repo (`render.yaml`). Set `MONGODB_URI` and `CLIENT_URL` (your `https://<name>.onrender.com`). `JWT_SECRET` is generated for you.
+3. In Render → service → Settings → *Deploy Hook*: copy the URL. In GitHub → Settings → Secrets → Actions add `RENDER_DEPLOY_HOOK_URL`.
+4. Merge to `main`: CI runs; when it passes, `deploy.yml` triggers the Render deploy. Optional demo data: Render shell → `npm run seed`.
+
+Limitation: Render's free disk is ephemeral, so **uploaded audio is lost on each deploy/restart** (the seeded demo tracks can be regenerated with `npm run seed`). For durable uploads use a paid persistent disk (`UPLOAD_DIR` on the mount) or move storage to S3/R2.

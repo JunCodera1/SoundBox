@@ -1,0 +1,24 @@
+name: CI
+on:
+  push: { branches: [main] }
+  pull_request:
+permissions: { contents: read }
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mongo:
+        image: mongo:7
+        ports: ["27017:27017"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: "package-lock.json\nfrontend/package-lock.json" }
+      - run: npm ci && npm --prefix frontend ci
+      - run: npm test
+      - run: npm --prefix frontend run typecheck
+      - run: npm run test:web
+      - run: npm run build
+      - run: npx --prefix frontend playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - run: npm audit --audit-level=high && npm --prefix frontend audit --audit-level=high
