@@ -19,7 +19,8 @@ export const config = {
   isProd,
   isTest,
   port: Number(process.env.PORT) || 5000,
-  mongoUri: process.env.MONGODB_URI || `mongodb://127.0.0.1:27017/${isTest ? "soundbox_test" : "soundbox_dev"}`,
+  // Tests must never hit the dev/prod database, whatever .env says (override only via MONGODB_TEST_URI).
+  mongoUri: isTest ? process.env.MONGODB_TEST_URI || "mongodb://127.0.0.1:27017/soundbox_test" : process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/soundbox_dev",
   jwtSecret,
   // Number of reverse-proxy hops to trust for X-Forwarded-For (0 = none, safe default when exposed directly).
   trustProxy: Number(process.env.TRUST_PROXY || 0),

@@ -15,5 +15,7 @@ Bugs found *by* these tests and fixed: like counter double-increment (Mongoose `
 | Manual: `npm run dev` | API + Vite up; `/api` and `/media` (Range 206) work through the proxy; login error shown correctly |
 | Manual: screenshots (desktop, mobile 390px, expanded player, light theme) | reviewed visually |
 
+Note: the Playwright run leaves a `soundbox_e2e` database and a temp upload dir behind (the web server is killed before it can clean up); it is dropped at the start of the next run, or manually: `mongosh --eval 'db.getSiblingDB("soundbox_e2e").dropDatabase()'`.
+
 ## Not executed / limits
 `migrate-v1` on a real v1 database, Firefox/WebKit, real MP3 decoding (demo tracks are WAV), real devices & screen readers, load testing, upload via the browser UI, comments UI, admin UI, rate-limit behaviour (disabled under `NODE_ENV=test`), SMTP/OAuth/payments (not implemented). Audio *output* is not audible in headless runs; playback is asserted through the advancing position.
