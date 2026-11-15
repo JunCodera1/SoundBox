@@ -30,3 +30,10 @@ Collections/field names (`users`, `songs`, `playlists`, `comments`, `posts`) and
 
 ## Decision: incremental where it pays, rewrite where the code is unsalvageable
 Same stack (Express/Mongoose/Vite/React/Tailwind/zustand). The backend was rewritten in place under `backend/src` with the same collections; the frontend shell was rebuilt (one UI system) because the legacy build is broken and the code mixes five UI libraries. Legacy code stays recoverable via tag `legacy-v1`.
+
+## Outcome (v2)
+Fixes 1–12 above were addressed by the rewrite (see ARCHITECTURE.md). Items 13–14: Cloudinary replaced by local uploads; Store/Payment/AI-page/feed/admin-template removed because they had no working backend or only mock data (recoverable at `legacy-v1`).
+
+## Security review summary
+Done: single httpOnly-cookie auth, server-side authz on every route, strict input schemas, regex escaping, helmet, CORS allow-list from env, rate limits (global + auth), upload allow-list/limits/random names, no secrets or URIs in logs, `npm audit` clean (fixed critical `proxy-addr`, react-router).
+Remaining risks: no CSRF token (mitigated by `SameSite=Lax` + JSON-only mutations + CORS allow-list); no account lockout/email verification/password reset; uploaded audio is not content-scanned or transcoded (MIME comes from the client, files are served with `nosniff`); `trust proxy` is fixed to 1 hop; JWT cannot be revoked before expiry (7 d); media is public by URL; ephemeral JWT secret in dev.

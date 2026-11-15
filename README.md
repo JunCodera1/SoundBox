@@ -1,100 +1,36 @@
-# SoundBox
+# SoundBox — your personal music universe
 
-Welcome to the Soundbox! This platform is dedicated to music lovers, artists, and anyone who wants to explore and share their passion for music. Whether you’re here to discover new tracks, showcase your own music, or connect with fellow enthusiasts, you’ll find what you’re looking for. This app is a combination of YouTube and Spotify.
+Listen, collect and share music. A MERN app (Express + MongoDB + React/Vite/Tailwind) with one persistent audio engine, queue, playlists, favorites, listening history, search and a local mix-maker.
 
-# Installation
+> **Music rights:** SoundBox ships with 10 *procedurally generated* demo tracks (CC0, made by the seed script). Uploads require the uploader to confirm they own the rights. SoundBox is not a licensed commercial streaming service.
 
-To install the application, follow these steps:
+## Quick start
 
-1. Clone the repository to your local machine using the command
-
-```bash
-git clone https://github.com/JunCodera1/SoundBox.git
-```
-
-2. Install the required dependencies using the command "npm install."
-3. Start the application using the command "npm start."
-
-# Usage
-
-First, run the development server:
+Requirements: Node ≥ 20, a running MongoDB (default `mongodb://127.0.0.1:27017`).
 
 ```bash
-npm install
-npm run dev
+npm run install:all            # root + frontend dependencies
+cp .env.example backend/.env   # optional in dev; set JWT_SECRET for stable sessions
+npm run seed                   # creates demo catalogue in database `soundbox_dev`
+npm run dev                    # API :5000 + web :5173 (Vite proxies /api and /media)
 ```
 
-# Why this project?
+Open http://localhost:5173. Create an account (no email verification) and play something.
 
-The Music Website is a platform that allows users to share and discover music. It's a place where people can come together to share their love for music, whether it's by sharing their own music, discovering new artists, or connecting with fellow music enthusiasts.
+Make an admin: `mongosh soundbox_dev --eval 'db.users.updateOne({username:"you"},{$set:{isAdmin:true}})'`.
 
-# Technologies Used: MERN Stack
+## Commands
+| | |
+|---|---|
+| `npm run dev` | API + web in watch mode |
+| `npm run build` | type-check + production build of the web app (`frontend/dist`) |
+| `npm start` | production API (`NODE_ENV=production`, needs `JWT_SECRET`); serves `frontend/dist` too |
+| `npm test` | backend API tests (uses DB `soundbox_test`, dropped on each run) |
+| `npm run test:web` | player/state unit tests |
+| `npm run test:e2e` | Playwright browser journey (own DB `soundbox_e2e`, port 5055/4173; set `PW_CHROMIUM=/usr/bin/chromium` to use a system browser) |
 
-## 1.MongoDB:
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/FEATURES.md](docs/FEATURES.md), [docs/TESTING.md](docs/TESTING.md), [docs/PROJECT_AUDIT.md](docs/PROJECT_AUDIT.md).
 
-Utilized as the primary database to store music tracks, user profiles, playlists, and other related data. Its document-oriented structure allows for flexible data representation, making it easy to manage complex data relationships.
-
-## 2.Express:
-
-Serves as the backend framework that handles API requests for features such as user authentication, song retrieval, and playlist management. Express simplifies routing and middleware integration, facilitating seamless communication between the frontend and backend.
-
-## 3.React:
-
-Powers the frontend of the music web application, allowing for the creation of dynamic and responsive user interfaces. React components enable users to browse songs, create playlists, and interact with the application in an intuitive manner.
-
-## 4.Node.js:
-
-Acts as the runtime environment for executing the backend code, enabling real-time data processing and enhancing performance. Node.js supports the development of scalable applications, making it ideal for handling multiple user requests concurrently.
-# Features
-
-For users:
-
-- Register/Login
-- Upload music
-- Listen to music
-- Download music
-- Register for packages
-- Payment
-- Manage playlists
-- Manage favorites
-- Manage reports
-- User feedback
-
-For admin:
-
-- Add, delete, edit users
-- Manage albums
-- Assign user rights
-- Manage reports
-- User feedback
-- Manage statistics
-- View revenue
-
-# Contributors
-
-- [@JunCodera1](https://github.com/JunCodera1)
-- [@HuyVo117](https://github.com/HuyVo117)
-
-# How to contribute to the project
-
-If you're interested in contributing to the project, follow these steps:
-
-1. Clone the repository to your local machine using the command "git clone <repository-url>."
-2. Make the desired changes to the codebase.
-3. Create a new branch using the command "git branch <branch-name>."
-4. Commit the changes using the command "git commit -m <commit-message>."
-5. Push the changes to the repository using the command "git push origin <branch-name>."
-6. Create a pull request to the main branch.
-
-# Code structure
-
-The codebase is organized into the following directories:
-
-- `src/`: Contains the source code for the application.
-- `public/`: Contains the static files for the application.
-- `tests/`: Contains the unit tests for the application.
-- `README.md`: This file.
-
-# License
-
-This project is licensed under the MIT License.
+## Configuration (`backend/.env`)
+See [.env.example](.env.example). `JWT_SECRET` is mandatory in production. Never commit `.env`.
+Original v1 code is preserved at git tag `legacy-v1`. `translaher/` is an unrelated Astro project left untouched.
